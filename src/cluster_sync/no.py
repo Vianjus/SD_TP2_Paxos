@@ -15,7 +15,6 @@ import os
 # recebe requisições dos clientes e realiza o consenso para enviar para o cluster store
 class NoP2P:
     def __init__(self, id, role, host, porta_para_nos, porta_para_clientes, vizinhos, barrier):
-        self.cluster_store = ClusterStore([("cluster0", 10000), ("cluster1", 10001), ("cluster2", 10002)])
         
         """
         host: endereço IP do nó atual.
@@ -403,14 +402,15 @@ class NoP2P:
     def commitar(self, mensagem):
 
         self.valor_aprendido = mensagem['valor'] # aprende o valor
-        print(f"\033[36mLearner {self.id} commitando valor {mensagem['valor']} da transação do nó {mensagem['ID']} para o Cluster Store\033[0m")
+        status = "sucess"
+        #print(f"\033[36mLearner {self.id} commitando valor {mensagem['valor']} da transação do nó {mensagem['ID']} para o Cluster Store\033[0m")
     
         # Envia mensagem ao Cluster Store
-        try:
-            resposta = self.cluster_store.enviar_mensagem(mensagem)
-            status = resposta.get("status")
-        except Exception as e:
-            status = "fail"
+        #try:
+        #    resposta = self.cluster_store.enviar_mensagem(mensagem)
+        #    status = resposta.get("status")
+        #except Exception as e:
+        #    status = "fail"
 
         # Responde o cliente que mandou a requisição originalmente, falando se a transação deu certo ou não
         self.responder_cliente(mensagem, status)
