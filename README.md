@@ -18,27 +18,6 @@ Em suma:
 - Accepters, caso todos aceitem o mesmo ID de transação, repassam a requisição para os leaners
 - Leaners realizam o consenso, aprendem o valor de transação, e realizam o commit no recurso R
 
-## Tolerância à falha e Cluster Store
-
-Para adicionar um nível de tolerância a falha sobre o protocolo Paxos, é adicionado o Cluster Store.
-
-O cluster Store é um cluster de réplicas, onde todos os elementos possuem uma cópia local do recurso R,
-porém, apenas o elemento considerado "primário" possui permissão de escrita no recurso R original.
-
-<img src="images/cluster_store.png" width="300">
-
-
-Para cada elemento falho do cluster store, há uma substituição ou corte na comunicação:
-
-
-<img src="images/fault_tolerance_1.png" width="300">
-<img src="images/fault_tolerance_2.png" width="300">
-<img src="images/fault_tolerance_3.png" width="300">
-
-
-## Overview
-<img src="images/project_overview.png" width="300">
-
 ## Distribuição
 
 Cada elemento de um cluster é executado dentro de um container docker, todos comunicando entre si.
