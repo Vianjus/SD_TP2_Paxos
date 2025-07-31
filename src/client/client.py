@@ -12,7 +12,7 @@ class Cliente:
         self.porta_no = porta_no # porta do nó
         self.porta_client = porta_client # porta do cliente
         self.commits_recebidos = 0
-        self.num_requisicoes = random.randint(1, 10) # número aleatório de requisições
+        self.num_requisicoes = random.randint(10, 50) # número aleatório de requisições
 
         self.client_host = socket.gethostbyname(socket.gethostname()) # ip do container
 
@@ -53,7 +53,7 @@ class Cliente:
                     return
 
                 resposta = json.loads(resposta.decode())
-                print(f"Cliente {self.id} recebeu: {resposta['status']}. Transação confirmada no valor de {resposta['valor']}.")
+                print(f"Cliente {self.id} commited. Transação confirmada no valor de {resposta['valor']}.")
 
                 client_socket.close()
                 self.commits_recebidos += 1
@@ -65,7 +65,7 @@ class Cliente:
 
     # O cliente fica em espera
     def ficar_ocioso(self):
-        tempo = random.uniform(1, 1)
+        tempo = random.randint(1, 5)
         print(f"Cliente {self.id} em espera por {tempo} segundos")
         time.sleep(tempo)
 

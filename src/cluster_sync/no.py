@@ -12,7 +12,7 @@ import os
 # ---------- NÓ DO CLUSTER SYNC ----------
 
 # Nó p2p do cluster sync do protocolo paxos
-# recebe requisições dos clientes e realiza o consenso para enviar para o cluster store
+# recebe requisições dos clientes e realiza o consenso para comittar
 class NoP2P:
     def __init__(self, id, role, host, porta_para_nos, porta_para_clientes, vizinhos, barrier):
         
@@ -402,22 +402,13 @@ class NoP2P:
     def commitar(self, mensagem):
 
         self.valor_aprendido = mensagem['valor'] # aprende o valor
-        status = "sucess"
-        #print(f"\033[36mLearner {self.id} commitando valor {mensagem['valor']} da transação do nó {mensagem['ID']} para o Cluster Store\033[0m")
-    
-        # Envia mensagem ao Cluster Store
-        #try:
-        #    resposta = self.cluster_store.enviar_mensagem(mensagem)
-        #    status = resposta.get("status")
-        #except Exception as e:
-        #    status = "fail"
-
+        print(f"\033[36mLearner {self.id} commitando valor {mensagem['valor']} da transação do nó {mensagem['ID']}\033[0m")
+        success = "success"
         # Responde o cliente que mandou a requisição originalmente, falando se a transação deu certo ou não
-        self.responder_cliente(mensagem, status)
+        self.responder_cliente(mensagem, success)
 
     # Responde o cliente que mandou a requisição
     def responder_cliente(self, mensagem, success):
-
         try:
             sock_cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -430,7 +421,6 @@ class NoP2P:
             if success == "success":
                 resposta_cliente = {
                     "tipo": "resposta",
-                    "status": "Success",
                     "mensagem": "Transação CONFIRMADA pelo Learner.",
                     "TID" : mensagem['TID'],
                     "valor": mensagem['valor']
@@ -439,7 +429,6 @@ class NoP2P:
             else:
                 resposta_cliente = {
                     "tipo": "resposta",
-                    "status": "Fail",
                     "mensagem": "Transação NEGADA. Tente novamente.",
                     "TID" : mensagem['TID'],
                     "valor": mensagem['valor']
@@ -497,7 +486,7 @@ class NoP2P:
                                 self.commitar(mensagem)
 
                     except socket.timeout:
-                        print(f"\033[33mAviso: Timeout ao receber mensagem no nó {self.id}.\033[0m")
+                        print(f"\033[33mEsperando comunicação no nó {self.id}.\033[0m")
                     except json.JSONDecodeError:
                         print(f"\033[31mErro: Dados recebidos não são JSON válido.{mensagem}\033[0m")
                     except Exception as e:
