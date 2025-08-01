@@ -68,7 +68,7 @@ class NoP2P:
         try:
             self.servidor_socket.bind((self.host, self.porta_para_outros_nos))
         except OSError as e:
-            print(f"Erro ao vincular a porta {self.porta_para_outros_nos}: {e}")
+            print(f"\033[31m[!]-Erro ao vincular a porta {self.porta_para_outros_nos}: {e}\033[0m")
         self.servidor_socket.listen()
 
 
@@ -108,12 +108,11 @@ class NoP2P:
                     else:
                         self.sockets_learners_clients.append({"id" : vizinho['id'], "socket" : sock, "role": vizinho['role'], "recebeu_prep" : False})
                      
-                    print(f"Nó {self.id} conectado ao vizinho {vizinho['id']} - {vizinho['role']}")
+                    print(f"\033[33mNó {self.id} conectado ao vizinho {vizinho['id']} - {vizinho['role']}\033[0m")
                     
                     break # se a conexão for bem sucedida, sai do loop
                 
                 except Exception as e:
-                    #print(f"\033[31mErro ao conectar com {vizinho}: {e}. Tentando novamente em 1s...\033[0m")
                     time.sleep(1) # sleep para garantir que o nó vizinho esteja escutando ao tentar conectar
 
     # Escuta e aceita conexões de nós vizinhos
@@ -149,7 +148,7 @@ class NoP2P:
                             })
             
             except Exception as e:
-                print(f"\033[31mErro ao aceitar conexão: {e}\033[0m")
+                print(f"\033[31m[!]-Erro ao aceitar conexão: {e}\033[0m")
                 break
 
     # Conecta um nó a um cliente externo
@@ -204,7 +203,7 @@ class NoP2P:
                 mensagem_decodificada = mensagem.decode()
                 mensagem_json = json.loads(mensagem_decodificada)
             except Exception as e:
-                print(f"\033[31mErro ao decodificar mensagem: {e}\033[0m")
+                print(f"\033[31m[!]-Erro ao decodificar mensagem: {e}\033[0m")
                 return
 
             # Atualiza o TID da mensagem
@@ -226,7 +225,7 @@ class NoP2P:
                     time.sleep(random.uniform(0.1, 0.5) * (2 ** self.mesma_preparacao))
 
             except Exception as e:
-                print(f"\033[31mErro ao mandar ou receber preparação: {e}\033[0m")
+                print(f"\033[31m[!]-Erro ao mandar ou receber preparação: {e}\033[0m")
 
             if self.promises_recebidos >= CONSENSO_ACCEPTERS:
                 print(f"\033[32mNó {self.id} chegou a um consenso. Mandando accepts\033[0m")
@@ -238,7 +237,7 @@ class NoP2P:
         if isinstance(mensagem, bytes):
             self.mandar_accept(json_string)
         else:
-            print(f"\033[31mErro: formato inválido de mensagem para mandar_accept: {mensagem}\033[0m")
+            print(f"\033[31m[!]-Erro: formato inválido de mensagem para mandar_accept: {mensagem}\033[0m")
 
     # Envia uma mensagem de preparação para todos os vizinhos conectados
     def mandar_preparacao(self, mensagem):
@@ -251,7 +250,7 @@ class NoP2P:
                 mensagem_json = json.loads(mensagem_decodificada)
                 mensagem_json['tipo'] = "preparacao"
 
-                print(f"Nó {self.id} enviando preparação: {mensagem_json}")
+                print(f"\033[34mNó {self.id} enviando preparação: {mensagem_json}\033[0m")
 
                 json_string = json.dumps(mensagem_json)
                 json_string = json_string.encode()
@@ -260,7 +259,7 @@ class NoP2P:
                 self.preparacoes_enviadas = self.preparacoes_enviadas + 1
 
             except Exception as e:
-                print(f"\033[31mErro ao enviar preparação: {e}\033[0m")
+                print(f"\033[31m[!]-Erro ao enviar preparação: {e}\033[0m")
 
     # Aguarda as respostas das preparações que mandou
     def receber_resposta_preparacao(self, mensagem):
@@ -291,7 +290,7 @@ class NoP2P:
                         break
                 
                 except Exception as e:
-                    print(f"\033[31mErro ao receber resposta de preparação: {e}\033[0m")
+                    print(f"\033[31m[!]-Erro ao receber resposta de preparação: {e}\033[0m")
 
 
     # ---------- PREPARAÇÃO | LADO DO ACCEPTOR ----------
@@ -320,7 +319,7 @@ class NoP2P:
         try:
             element['socket'].send((json.dumps(mensagem_tupla)).encode()) #aqui
         except Exception as e:
-            print(f"\033[31mErro ao enviar 'promise': {e}\033[0m")
+            print(f"\033[31m[!]-Erro ao enviar 'promise': {e}\033[0m")
     
     # Devolve um "not promise" como resposta à mensagem de preparação de outro nó
     def negar_preparacao(self, element, mensagem):
@@ -333,7 +332,7 @@ class NoP2P:
         try:
             element['socket'].send((json.dumps(mensagem_tupla)).encode())
         except Exception as e:
-            print(f"\033[31mErro ao enviar 'not promise': {e}\033[0m")
+            print(f"\033[31m[!]-Erro ao enviar 'not promise': {e}\033[0m")
 
 
     # ---------- ACEITAÇÃO | LADO DO ACCEPTOR ----------
@@ -356,7 +355,7 @@ class NoP2P:
                 element['socket'].send(json_string)
                 print(f"\033[32mNó {self.id} enviou 'accept' para {element['id']}\033[0m")
             except Exception as e:
-                print(f"\033[31mErro ao enviar 'accept': {e}\033[0m")
+                print(f"\033[31m[!]-Erro ao enviar 'accept': {e}\033[0m")
     
     # Recebe um "accept"
     def processar_accept(self, mensagem):
@@ -388,7 +387,7 @@ class NoP2P:
 
         # Incrementa contagem de commits recebidos para esse TID
         self.commits_recebidos[tid]["contagem"] += 1
-        print(f"Learner {self.id} recebeu {self.commits_recebidos[tid]['contagem']} commits para TID {tid}")
+        print(f"\033[33mLearner {self.id} recebeu {self.commits_recebidos[tid]['contagem']} commits para TID {tid}\033[0m")
 
         # Verifica se atingiu a maioria para tomar decisão
         if self.commits_recebidos[tid]["contagem"] >= CONSENSO_LEARNERS and tid not in self.commits_processados:
@@ -398,11 +397,11 @@ class NoP2P:
         
         return False
 
-    # Commita (manda pro Cluster Store), recebe a resposta e avisa o cliente
+    # Commita, recebe a resposta e avisa o cliente
     def commitar(self, mensagem):
 
         self.valor_aprendido = mensagem['valor'] # aprende o valor
-        print(f"\033[36mLearner {self.id} commitando valor {mensagem['valor']} da transação do nó {mensagem['ID']}\033[0m")
+        print(f"\033[34mLearner {self.id} commitando valor {mensagem['valor']} da transação do nó {mensagem['ID']}\033[0m")
         success = "success"
         # Responde o cliente que mandou a requisição originalmente, falando se a transação deu certo ou não
         self.responder_cliente(mensagem, success)
@@ -412,10 +411,10 @@ class NoP2P:
         try:
             sock_cliente = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-            print(f"Tentando conectar ao cliente {mensagem['client_host']} na porta {mensagem['client_port']}...")
+            print(f"\033[35mTentando conectar ao cliente {mensagem['client_host']} na porta {mensagem['client_port']}...\033[0m")
 
             sock_cliente.connect((mensagem['client_host'], mensagem["client_port"]))
-            print("Conexão com o cliente estabelecida!")
+            print("\033[35mConexão com o cliente estabelecida!\033[0m")
 
             # Cria a mensagem de aviso
             if success == "success":
@@ -435,7 +434,7 @@ class NoP2P:
                 }
             
             # Envia o aviso para o cliente
-            print("Enviando resposta ao cliente...")
+            print("\033[35mEnviando resposta ao cliente...\033[0m")
             sock_cliente.send(json.dumps(resposta_cliente).encode())
             print("\033[32mResposta enviada ao cliente com sucesso!\033[0m")
 
@@ -472,10 +471,6 @@ class NoP2P:
                             if mensagem["TID"] not in self.commits_recebidos:
                                 self.commits_recebidos[mensagem["TID"]] = {"contagem": 0}
 
-                            # if mensagem["TID"] != self.TID:
-                            #     print(f"\033[31mLearner {self.id} ignorou commit de TID {mensagem['TID']} (esperado {self.TID})\033[0m")
-                            #     continue  # ignora commits antigos
-
                             # Print detalhado para depuração
                             print(f"\033[33mLearner {self.id} recebeu commit para TID {mensagem['TID']} (esperado {self.TID})\033[0m")
 
@@ -488,7 +483,7 @@ class NoP2P:
                     except socket.timeout:
                         print(f"\033[33mEsperando comunicação no nó {self.id}.\033[0m")
                     except json.JSONDecodeError:
-                        print(f"\033[31mErro: Dados recebidos não são JSON válido.{mensagem}\033[0m")
+                        print(f"\033[31mErro: Dados recebidos não são JSON válido.\033[0m")
                     except Exception as e:
                         print(f"\033[31mErro ao receber mensagem: {e}\033[0m\n{mensagem}")
 
